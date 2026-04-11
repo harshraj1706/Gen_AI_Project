@@ -1,0 +1,36 @@
+# Core API
+fastapi
+uvicorn
+streamlit
+
+# LLM + Agents
+openai
+langchain
+langchain-community
+langchain-openai
+langchain-huggingface
+crewai
+
+# Mistral AI
+mistralai
+
+# HTTP requests (for Grok / APIs)
+requests
+httpx
+
+# Environment & config
+python-dotenv
+pydantic
+
+# Vector DB / Embeddings
+chromadb
+faiss-cpu
+sentence-transformers
+tiktoken
+
+# PDF + Document processing (RAG)
+pypdf
+
+# Optional but VERY useful
+numpy
+pandas
