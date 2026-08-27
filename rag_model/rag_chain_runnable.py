@@ -1,14 +1,17 @@
 import os
 import re
 import sys
+from functools import lru_cache
 from dotenv import load_dotenv
 
 from langchain.chat_models import init_chat_model
 from langchain_core.prompts import ChatPromptTemplate
 
 try:
+    from rag_model.network_config import sanitize_dead_local_proxies
     from rag_model.vector_db import load_vector_store
 except ModuleNotFoundError:
+    from network_config import sanitize_dead_local_proxies
     from vector_db import load_vector_store
 
 if os.name == "nt" and hasattr(sys.stdout, "reconfigure"):
@@ -20,10 +23,18 @@ load_dotenv()
 # -----------------------------
 # 🔹 Initialize LLM
 # -----------------------------
-llm = init_chat_model(
-    "openai/gpt-oss-120b",
-     model_provider="groq"
-)
+@lru_cache(maxsize=1)
+def get_llm():
+    """Initialize the model lazily so provider issues don't break startup."""
+    sanitize_dead_local_proxies()
+
+    if not os.getenv("GROQ_API_KEY"):
+        raise RuntimeError("Missing GROQ_API_KEY.")
+
+    return init_chat_model(
+        "openai/gpt-oss-120b",
+        model_provider="groq"
+    )
 
 # -----------------------------
 # 🔹 Prompt Template
@@ -183,7 +194,13 @@ def get_rag_response(question: str) -> str:
     })
 
     # Call LLM
-    response = llm.invoke(prompt)
+    try:
+        response = get_llm().invoke(prompt)
+    except Exception as exc:
+        raise RuntimeError(
+            "Could not reach the configured Groq model. "
+            "Check your internet/proxy settings and GROQ_API_KEY."
+        ) from exc
 
     return response.content
 

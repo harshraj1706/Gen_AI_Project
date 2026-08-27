@@ -2,12 +2,15 @@
 fastapi
 uvicorn
 streamlit
+python-multipart
 
 # LLM + Agents
 openai
 langchain
 langchain-community
+langchain-groq
 langchain-openai
+langchain-text-splitters
 langchain-huggingface
 crewai
 

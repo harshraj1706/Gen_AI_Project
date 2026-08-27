@@ -4,6 +4,20 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 
+CHUNK_SIZE = 800
+CHUNK_OVERLAP = 100
+CHUNK_SEPARATORS = ["\n\n", "\n", " ", ""]
+
+
+def _build_splitter() -> RecursiveCharacterTextSplitter:
+    """Use a local character-based splitter to avoid tokenizer downloads."""
+    return RecursiveCharacterTextSplitter(
+        chunk_size=CHUNK_SIZE,
+        chunk_overlap=CHUNK_OVERLAP,
+        separators=CHUNK_SEPARATORS,
+        length_function=len,
+    )
+
 
 def _legacy_load_pdfs_from_folder(folder_path:str= "D:\Bills") -> List[Document]:
     """
@@ -38,11 +52,7 @@ def _legacy_load_pdfs_from_folder(folder_path:str= "D:\Bills") -> List[Document]
                 page.page_content = page.page_content.replace("\n", " ").strip()
 
             # 🔹 Split into chunks
-            splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-                chunk_size=800,
-                chunk_overlap=100,
-                separators=["\n\n", "\n", " ", ""]
-            )
+            splitter = _build_splitter()
 
             chunks = splitter.split_documents(pages)
 
@@ -116,11 +126,7 @@ def load_and_chunk_pdf(pdf_path: str, source_name: str | None = None) -> List[Do
             f"'{file_name}'."
         )
 
-    splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-        chunk_size=800,
-        chunk_overlap=100,
-        separators=["\n\n", "\n", " ", ""]
-    )
+    splitter = _build_splitter()
 
     chunks = splitter.split_documents(cleaned_pages)
 

@@ -4,6 +4,11 @@ import shutil
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 
+try:
+    from rag_model.network_config import sanitize_dead_local_proxies
+except ModuleNotFoundError:
+    from network_config import sanitize_dead_local_proxies
+
 # ── Embedding model (runs locally, no API key needed) ────────────────────
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 FAISS_INDEX_PATH = "faiss_index"   # folder where FAISS saves the index
@@ -11,6 +16,8 @@ FAISS_INDEX_PATH = "faiss_index"   # folder where FAISS saves the index
 
 def get_embeddings():
     """Returns the HuggingFace embedding model."""
+    sanitize_dead_local_proxies()
+
     model_kwargs = {}
     hf_token = os.getenv("HF_TOKEN")
 
